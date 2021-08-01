@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import MoviesList from './components/MoviesList';
 import './App.css';
@@ -11,15 +11,21 @@ function App() {
   const [error, setError] = useState(null);
 
 
-  async function fetchMoviesHandler() {
+  //* The function was declared and bc of hoisting it could be used
+  //* Has to be after the const has been initialized
+  // useEffect(() => {
+  //   fetchMoviesHandler();
+  // }, [fetchMoviesHandler]);
+
+
+  // async function fetchMoviesHandler() {
+  const fetchMoviesHandler = useCallback(async () => {
     setIsLoading(true);
-    setError(null);  //To delete any previous error
+    setError(null);
 
     try{
-       /* const response = await fetch('https://swapi.dev/api/films/'); */
       const response = await fetch('https://swapi.dev/api/films/');
-      // const data = await response.json();
-
+      
       if (!response.ok) {
         throw new Error("Something went wrong!")
       };
@@ -34,13 +40,17 @@ function App() {
         };
       });
       setMovies(transformedMovies)
-      // setIsLoading(false);
     } catch(error) {
       setError(error.message);
-      // setIsLoading(false);
     }
     setIsLoading(false);
-  };
+  //};
+  }, []);
+
+  //* Once the const has been initialized
+  useEffect(() => {
+    fetchMoviesHandler();
+  }, [fetchMoviesHandler]);
 
   let content = <p>There are no movies yet!</p>
   if (movies.length > 0) {
@@ -59,13 +69,6 @@ function App() {
       <section>
         <button onClick={fetchMoviesHandler}>Fetch Movies</button>
       </section>
-      {/* <section>
-        {!isLoading && movies.length > 0 && <MoviesList movies={movies} />}
-        {// {!isLoading && movies.length === 0 && <p>There are no movies yet!</p>} //}
-        {!isLoading && movies.length === 0 && !error &&<p>There are no movies yet!</p>}
-        {!isLoading && error && <p>{ error }</p>}
-        {isLoading && <p>Loading...</p>}
-      </section> */}
       <section>{ content }</section>
     </React.Fragment>
   );
